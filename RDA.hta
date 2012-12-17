@@ -24,7 +24,7 @@ SELECTION="no"
 <!--
 Option Explicit
 Dim ShApp,WSSh,SpF,Ext1,Ext2,Ext,Vbr,Vbc,Stg1,Strt,ct,Rbin
-Rbin = "C:\Program Files\R\R-2.13.2\bin\x64\R.exe"
+Rbin = "C:\Program Files\R\R-2.14.1\bin\x64\R.exe"
 Set ShApp = CreateObject("Shell.Application")
 Set WSSh = CreateObject("WScript.Shell")
 Set SpF = WSSh.SpecialFolders
@@ -42,7 +42,7 @@ End sub
 
 sub Sfda ()
 Dim ObjBFF
-ObjBFF = OpenFileDlg("CSV (*.csv)|*.csv|ALL Files (*.*)|*.*|","Please select the file.")
+ObjBFF = OpenFileDlg("CSV (*.csv)|*.csv|TXT (*.txt)|*.txt|ALL Files (*.*)|*.*|","Please select the file.")
 'Set ObjBFF = ShApp.BrowseForFolder(0, "ファイル選択", &H0010 Or &H4000,SpF("MyComputer"))
 If ObjBFF = "" then
 Msgbox("An error occurred.")

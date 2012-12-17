@@ -1,0 +1,149 @@
+<html>
+<head>
+<title>Realtime DATA Analyzer</title>
+<SCRIPT>
+window.moveTo( screen.width/2-250, screen.height/2-90 );
+window.resizeTo( 500, 180 );
+</SCRIPT><HTA:APPLICATION ID="msibk"
+APPLICATIONNAME="Realtime DATA Analyzer"
+BORDER="dialog"
+CAPTION="yes"
+CONTEXTMENU="no"
+ICON="./rda.ico"
+MAXIMIZEBUTTON="no"
+MINIMIZEBUTTON="yes"
+SHOWINTASKBAR="yes"
+SCROLL = "no"
+SINGLEINSTANCE="yes"
+SYSMENU="yes"
+VERSION="1.0"
+WINDOWSTATE="normal"
+SELECTION="no"
+> 
+<script language="VBScript">
+<!--
+Option Explicit
+Dim ShApp,WSSh,SpF,Ext1,Ext2,Ext,Vbr,Vbc,Stg1,Strt,ct,Rbin
+Rbin = "C:\Program Files\R\R-2.13.2\bin\x64\R.exe"
+Set ShApp = CreateObject("Shell.Application")
+Set WSSh = CreateObject("WScript.Shell")
+Set SpF = WSSh.SpecialFolders
+
+sub Sfdb ()
+Dim ObjBFF
+Set ObjBFF = ShApp.BrowseForFolder(0, "Please select the folder.",0,SpF("Desktop"))
+If ObjBFF Is Nothing then
+Msgbox("An error occurred.")
+Else
+document.brws.out.Value = ObjBFF.Items.Item.Path
+Msgbox(ObjBFF.Items.Item.Path)
+End If
+End sub
+
+sub Sfda ()
+Dim ObjBFF
+ObjBFF = OpenFileDlg("CSV (*.csv)|*.csv|ALL Files (*.*)|*.*|","Please select the file.")
+'Set ObjBFF = ShApp.BrowseForFolder(0, "ファイル選択", &H0010 Or &H4000,SpF("MyComputer"))
+If ObjBFF = "" then
+Msgbox("An error occurred.")
+Else
+document.brws.in.Value = ObjBFF
+Msgbox ObjBFF
+End If
+End sub
+
+
+sub Exitter ()
+
+Ext1 = Msgbox ("RealTime DATA Analyzer v1.00" & vbCrLf &"Copyright (c) 2011,misai-room" & vbCrLf & "This application lisensed with this BSD lisence.",vbOkCancel+vbInformation+vbDefaultButton4,"Version INFO")
+If Ext1 = vbOk Then 
+Msgbox("Copyright (c) 2011,misai-room" & vbCrLf & "All rights reserved." & vbCrLf & "" & vbCrLf & "Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:" & vbCrLf & vbCrLf & "    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer." & vbCrLf & "    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution." & vbCrLf & "    * Neither the name of the misai-room nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.")
+Msgbox("THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ""AS IS"" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.")
+
+If ct = 0 and Ext2 <> vbCancel Then
+Do Until Ext2 = vbCancel or ct =5
+Ext2 = Msgbox("Cancel to close the window.",vbQuestion+vbYesNoCancel+vbDefaultButton1,"Confirmation")
+If Ext2 = vbYes Then
+Vbr = Vbr + 1
+ElseIf Ext2 = vbNo Then
+Vbc = Vbc +1
+Else
+End If
+ct = ct + 1
+Loop
+If Vbr = 2 and Vbc = ct - Vbr Then
+Ext = Msgbox("Congratulations!",vbInformation+vbOKOnly,"Goto Twitter")
+
+ WSSh.Run "http://twitter.com/KTR331", 3
+    Set WSSh = Nothing
+
+
+Else
+End If
+End If
+End If
+End Sub
+
+function SendR ()
+dim FSO,FSOTX,JTM,TargetR,UxTrg
+Set WSSh = CreateObject("WScript.Shell")
+JTM = "temp" & Year(NOW()) & Right("0" & Month(NOW()),  2) & Right("0" & Day(NOW()),    2) & Right("0" & Hour(NOW()),   2) & Right("0" & Minute(NOW()), 2) & Right("0" & Second(NOW()), 2)
+Set FSO = CreateObject("Scripting.FileSystemObject")
+TargetR = WSSh.CurrentDirectory & "\" & JTM & ".R"
+Set FSOTX = FSO.CreateTextFile(TargetR)
+
+'Msgbox(WSSh.CurrentDirectory & "\" & JTM & ".R")
+FSOTX.WriteLine("tgt.csv <- " & Replace( "'" & document.brws.in.Value & "'","\","/") & ";")
+FSOTX.WriteLine("out.csv <- " & Replace( "'" & document.brws.out.Value & "'","\","/") & ";")
+'FSOTX.WriteLine("dt <- " &  &
+FSOTX.WriteLine("qpcr.input(tgt.csv,out.csv)")
+FSOTX.Close()
+
+Msgbox("Made temp file." & vbCrLf & "Start R program.")
+'UxTrg = Replace(TargetR,"\","/")
+'Msgbox(UxTrg)
+'WSSh.Exec(Rbin --no-restore --no-save < UxTrg)
+WSSh.Exec(Chr(34) & Rbin &  Chr(34) & " --no-restore --no-save < " &  Chr(34) & TargetR & Chr(34))
+Msgbox("Compleate!")
+FSO.DeleteFile TargetR,True
+
+End Function
+
+
+Function OpenFileDlg(Filter,Title)
+Dim msHTA
+Set msHTA=CreateObject("WScript.Shell").Exec("MSHTA.EXE ""javascript:new ActiveXObject('Scripting.FileSystemObject').GetStandardStream(0).ReadAll()""")
+Set SpF = CreateObject("WScript.Shell").SpecialFolders
+msHTA.StdIn.WriteLine "<object id=HtmlDlgHelper classid=CLSID:3050f4e1-98b5-11cf-bb82-00aa00bdce0b></object>"
+msHTA.StdIn.WriteLine "<script language=vbscript>"
+msHTA.StdIn.WriteLine "resizeTo 0,0"
+msHTA.StdIn.WriteLine "Sub window_onload()"
+msHTA.StdIn.WriteLine "CreateObject(""Scripting.FileSystemObject"").GetStandardStream(1).Write HtmlDlgHelper.object.openfiledlg(""" & SpF("MyComputer") & """,,""" & Filter & """,""" & Title & """)"
+msHTA.StdIn.WriteLine "close"
+msHTA.StdIn.WriteLine "End Sub"
+msHTA.StdIn.WriteLine "</script>"
+msHTA.StdIn.WriteLine "<hta:application caption=no showintaskbar=no />"
+msHTA.StdIn.Close
+OpenFileDlg=msHTA.StdOut.ReadAll()
+If InStr(OpenFileDlg,vbNullChar) Then OpenFileDlg=Left(OpenFileDlg,InStr(OpenFileDlg,vbNullChar)-1)
+End Function
+
+
+-->
+</script>
+</head>
+
+<body bgcolor = "#EDEDED">
+<form name= "brws"><fieldset style="margin: 10px;">
+<legend>INPUT/OUTPUT</legend>
+<p style="margin: 5px; margin-bottom: 10px;">
+ ABI RealtimePCR CSV：<input type=text name="in" value="" size="35"><input type="button" value="Click" onclick="Sfda()" style="margin-left: 10px;"><br>
+ SAVE Analyzed DATA ：<input type=text name="out" value="" size="35"><input type="button" value="Click" onclick="Sfdb()" style="margin-left: 10px;"><br>
+<!-- Standerd Dilution ratio ：x<input type=text name="out" value="" size=""><br> -->
+</p>
+</fieldset>
+<input type=button onclick="Exitter()" value="Version Info"  style="position: absolute; left: 5px; bottom: 5px; font-size:10px;">
+<input type=button onclick=window.close(); value="Cancel" style="position: absolute; right: 100px; bottom: 5px; WIDTH: 85px;">
+<input type=button onclick="SendR()" value="Analyze" style="position: absolute; right: 5px; bottom: 5px; WIDTH: 85px;">
+</form>
+</body></html>

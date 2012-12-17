@@ -14,7 +14,7 @@ qpcr.count <- suppressWarnings(grep("Well", qpcr.table) - 1)
 abiv <- grep("^.*\\.txt$", x, ignore.case = FALSE)
 if (length(abiv) != 0){
 qpcr.rtx <- read.delim(x, skip = qpcr.count, blank.lines.skip = FALSE, fill = T)
-#save(file="C:/Users/myat/Desktop/test/debug.txt", names(qpcr.rtx), "\n")
+#save(file="C:/Users/neko/Desktop/test/debug.txt", names(qpcr.rtx), "\n")
 #names(qpcr.rtx) <- sub("CÑ.", "Ct", names(qpcr.rtx))
 #it is dependent by os(windows or unix)
 names(qpcr.rtx) <- gsub("Quantity", "Qty", names(qpcr.rtx))
